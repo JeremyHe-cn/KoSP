@@ -1,6 +1,7 @@
-package me.alzz.kosp
+package me.alzz.kosp.sample
 
 import android.content.Context
+import me.alzz.kosp.KoSharePrefs
 
 /**
  * Created by jeremyhe on 2017/11/4.

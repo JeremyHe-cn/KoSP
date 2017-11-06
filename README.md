@@ -3,8 +3,8 @@
 An easy way to write share preference
 
 ## How to use
-Add the follow to root/build.gradle
-```
+Add the follow to **root/build.gradle**
+```gradle
 allprojects {
     repositories {
         // other repository ...
@@ -13,8 +13,8 @@ allprojects {
 }
 ```
 
-Add dependency to app/build.gradle
-```
+Add dependency to **app/build.gradle**
+```gradle
 dependencies {
     // ...
     compile 'me.alzz:kosp:1.0.0'
@@ -64,9 +64,9 @@ class MainActivity : AppCompatActivity() {
 ```
 
 ## Proguard
-```
--keepclassmember class * extend me.alzz.kosp.KoSharePrefs {
-    *
+```proguard
+-keepclassmembers class * extends me.alzz.kosp.KoSharePrefs {
+    *;
 }
 ```
 
