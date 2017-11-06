@@ -9,7 +9,7 @@ import kotlin.reflect.KProperty
  * 继续此类快速构建 SharePreferences
  * Created by jeremyhe on 2017/11/4.
  */
-abstract class KoPreferences(context : Context) {
+abstract class KoSharePrefs(context : Context) {
 
     private val sp : SharedPreferences by lazy {
         context.getSharedPreferences(PREFS_FILE_NAME, Context.MODE_PRIVATE)
@@ -25,7 +25,7 @@ abstract class KoPreferences(context : Context) {
         override fun getValue(thisRef: Any, property: KProperty<*>): T {
             val key = if (name.isEmpty()) property.name else name
             with(sp) {
-                val res = when (default) {
+                val res : Any = when (default) {
                     is Int -> getInt(key, default)
                     is Long -> getLong(key, default)
                     is Float -> getFloat(key, default)

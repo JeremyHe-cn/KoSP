@@ -31,4 +31,5 @@ dependencies {
 
     compile "org.jetbrains.anko:anko-commons:0.10.2"
     compile project(":lib")
+//    compile 'me.alzz:kosp:master-SNAPSHOT'
 }
