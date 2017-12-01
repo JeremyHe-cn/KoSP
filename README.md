@@ -65,9 +65,10 @@ class MainActivity : AppCompatActivity() {
 
 ## Proguard
 ```proguard
--keepclassmembers class * extends me.alzz.kosp.KoSharePrefs {
-    *;
-}
+-keepattributes *Annotation*
+-keep class kotlin.** { *; }
+-keep class org.jetbrains.** { *; }
+-dontwarn kotlin.reflect.jvm.internal.**
 ```
 
 ## Thanks
