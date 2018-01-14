@@ -1,5 +1,5 @@
 # KoSP
-[![](https://jitpack.io/v/me.alzz/kosp.svg)](https://jitpack.io/#me.alzz/kosp)
+[![](https://jitpack.io/v/me.alzz/kosp.svg)](https://jitpack.io/#me.alzz/kosp)  
 An easy way to write share preference
 
 ## How to use
@@ -17,7 +17,7 @@ Add dependency to **app/build.gradle**
 ```gradle
 dependencies {
     // ...
-    compile 'me.alzz:kosp:1.0.0'
+    compile 'me.alzz:kosp:1.1.1'
 }
 ```
 
