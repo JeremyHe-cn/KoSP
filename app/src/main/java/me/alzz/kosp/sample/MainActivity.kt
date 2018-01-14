@@ -3,7 +3,6 @@ package me.alzz.kosp.sample
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
-import me.alzz.kosp.sample.R
 
 class MainActivity : AppCompatActivity() {
 
@@ -13,9 +12,19 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        contextTv.text = "isFirstTimeOpen = ${prefs.isFirstTimeOpen}\r\nuserName = ${prefs.userName}"
+        var content = "isFirstTimeOpen = ${prefs.isFirstTimeOpen}\r\nuserName = ${prefs.userName}"
 
         prefs.isFirstTimeOpen = false
         prefs.userName = "Jeremy He"
+
+        prefs.avatarUrl["user1"] = "http://..../xx.jpg"
+        val url = prefs.avatarUrl["user1"]
+        content += "\r\navatar url of user1: $url"
+        content += "\r\navatar url of user2: ${prefs.avatarUrl["user2"]}"
+
+        content += "\r\nlast login time: ${prefs.lastLoginTime["user1"]}"
+        prefs.lastLoginTime["user1"] = System.currentTimeMillis()
+
+        contextTv.text = content
     }
 }

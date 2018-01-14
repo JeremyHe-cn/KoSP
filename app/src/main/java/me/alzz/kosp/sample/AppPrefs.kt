@@ -17,12 +17,26 @@ class AppPrefs(context: Context) : KoSharePrefs(context) {
      * key : isFirstTimeOpen
      * value -> Boolean
      */
-    var isFirstTimeOpen : Boolean by Preference(true)
+    var isFirstTimeOpen by boolean()
 
     /**
      * custom key name
      * key : user_name
      * value -> String
      */
-    var userName : String by Preference("user_name", "")
+    var userName by string(name = "user_name")
+
+    /**
+     * dynamic key name
+     * key : userId + '_avatarUrl'
+     * value -> String
+     */
+    val avatarUrl by preference("none")
+
+    /**
+     * dynamic key name
+     * key : userId + '_last_login_time'
+     * value -> String
+     */
+    val lastLoginTime by preference(0L, "last_login_time")
 }

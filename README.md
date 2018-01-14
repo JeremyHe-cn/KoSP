@@ -34,14 +34,28 @@ class AppPrefs(context: Context) : KoSharePrefs(context) {
      * key : isFirstTimeOpen
      * value -> Boolean
      */
-    var isFirstTimeOpen : Boolean by Preference(true)
+    var isFirstTimeOpen by boolean()
 
     /**
      * custom key name
      * key : user_name
      * value -> String
      */
-    var userName : String by Preference("user_name", "")
+    var userName by string(name = "user_name")
+
+    /**
+     * dynamic key name
+     * key : userId + '_avatarUrl'
+     * value -> String
+     */
+    val avatarUrl by preference("none")
+
+    /**
+     * dynamic key name
+     * key : userId + '_last_login_time'
+     * value -> String
+     */
+    val lastLoginTime by preference(0L, "last_login_time")
 }
 ```
 
@@ -55,10 +69,20 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        contextTv.text = "isFirstTimeOpen = ${prefs.isFirstTimeOpen}\r\nuserName = ${prefs.userName}"
+        var content = "isFirstTimeOpen = ${prefs.isFirstTimeOpen}\r\nuserName = ${prefs.userName}"
 
         prefs.isFirstTimeOpen = false
         prefs.userName = "Jeremy He"
+
+        prefs.avatarUrl["user1"] = "http://..../xx.jpg"
+        val url = prefs.avatarUrl["user1"]
+        content += "\r\navatar url of user1: $url"
+        content += "\r\navatar url of user2: ${prefs.avatarUrl["user2"]}"
+
+        content += "\r\nlast login time: ${prefs.lastLoginTime["user1"]}"
+        prefs.lastLoginTime["user1"] = System.currentTimeMillis()
+
+        contextTv.text = content
     }
 }
 ```
