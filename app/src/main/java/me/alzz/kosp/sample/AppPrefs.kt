@@ -39,4 +39,10 @@ class AppPrefs(context: Context) : KoSharePrefs(context) {
      * value -> String
      */
     val lastLoginTime by preference(0L, "last_login_time")
+
+    /**
+     * custom separator and postfix mode
+     * key: 'lastTime@' + userId
+     */
+    val lastTime by preference(0L, separator = "@", postfixMode = true)
 }

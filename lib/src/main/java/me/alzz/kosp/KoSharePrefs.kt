@@ -22,10 +22,18 @@ abstract class KoSharePrefs(context : Context) {
     protected fun float(default: Float = 0f, name: String = "") = Preference(name, default)
     protected fun string(default: String = "", name: String = "") = Preference(name, default)
     protected fun boolean(default: Boolean = false, name: String = "") = Preference(name, default)
-    protected fun <T> preference(default: T, name: String = "") = Preference(name, Preference(default))
+    protected fun <T> preference(default: T, name: String = "", separator: String = "_", postfixMode: Boolean = false): Preference<Preference<T>> {
+        val pref = Preference(name, default)
+        pref.separator = separator
+        pref.postfixMode = postfixMode
+        return Preference(pref)
+    }
 
-    inner class Preference<T>(private var name : String, private val default : T) :
+    inner class Preference<T>(internal var name : String, private val default : T) :
             ReadWriteProperty<Any?, T> {
+
+        internal var separator = "_"
+        internal var postfixMode = false
 
         constructor(default: T) : this("", default)
 
@@ -71,17 +79,27 @@ abstract class KoSharePrefs(context : Context) {
 
         private lateinit var property: KProperty<*>
 
-        operator fun get(prefix: String): T {
+        operator fun get(key: String): T {
             val name = if (this.name.isEmpty()) property.name else this.name
-            val key = "${prefix}_$name"
-            val pref by Preference(key, default)
+            val prefName = if (postfixMode) {
+                "$name$separator$key"
+            } else {
+                "$key$separator$name"
+            }
+
+            val pref by Preference(prefName, default)
             return pref
         }
 
-        operator fun set(prefix: String, value: T) {
+        operator fun set(key: String, value: T) {
             val name = if (this.name.isEmpty()) property.name else this.name
-            val key = "${prefix}_$name"
-            var pref by Preference(key, default)
+            val prefName = if (postfixMode) {
+                "$name$separator$key"
+            } else {
+                "$key$separator$name"
+            }
+
+            var pref by Preference(prefName, default)
             pref = value
         }
     }

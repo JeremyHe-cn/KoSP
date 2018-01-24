@@ -25,6 +25,8 @@ class MainActivity : AppCompatActivity() {
         content += "\r\nlast login time: ${prefs.lastLoginTime["user1"]}"
         prefs.lastLoginTime["user1"] = System.currentTimeMillis()
 
+        prefs.lastTime["user1"] = System.currentTimeMillis()
+
         contextTv.text = content
     }
 }
