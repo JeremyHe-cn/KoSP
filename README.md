@@ -56,6 +56,12 @@ class AppPrefs(context: Context) : KoSharePrefs(context) {
      * value -> String
      */
     val lastLoginTime by preference(0L, "last_login_time")
+
+    /**
+     * custom separator and postfix mode
+     * key: 'lastTime@' + userId
+     */
+    val lastTime by preference(0L, separator = "@", postfixMode = true)
 }
 ```
 
@@ -82,9 +88,23 @@ class MainActivity : AppCompatActivity() {
         content += "\r\nlast login time: ${prefs.lastLoginTime["user1"]}"
         prefs.lastLoginTime["user1"] = System.currentTimeMillis()
 
+        prefs.lastTime["user1"] = System.currentTimeMillis()
+
         contextTv.text = content
     }
 }
+```
+
+result:
+```xml
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<map>
+    <boolean name="isFirstTimeOpen" value="false" />
+    <string name="user1_avatarUrl">http://..../xx.jpg</string>
+    <string name="user_name">Jeremy He</string>
+    <long name="user1_last_login_time" value="1516795291706" />
+    <long name="lastTime@user1" value="1516795291706" />
+</map>
 ```
 
 ## Proguard
