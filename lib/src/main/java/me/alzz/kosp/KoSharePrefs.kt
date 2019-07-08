@@ -15,20 +15,18 @@ import kotlin.reflect.KProperty
 abstract class KoSharePrefs(context : Context, useEncrypt: Boolean = false) {
 
     private val sp : SharedPreferences by lazy {
-        context.getSharedPreferences(PREFS_FILE_NAME, Context.MODE_PRIVATE)
-    }
-
-
-    protected abstract val PREFS_FILE_NAME: String
-
-    init {
+        val sp = context.getSharedPreferences(PREFS_FILE_NAME, Context.MODE_PRIVATE)
         if (useEncrypt) {
             Hawk.init(context)
                     .setEncryption(KeyStoreEncryption(context, PREFS_FILE_NAME))
                     .setStorage(SharedPreferencesStorage(sp))
                     .build()
         }
+        sp
     }
+
+
+    protected abstract val PREFS_FILE_NAME: String
 
     protected fun int(default: Int = 0, name: String = "", encrypt: Boolean = false) = Preference(name, default, encrypt)
     protected fun long(default: Long = 0, name: String = "", encrypt: Boolean = false) = Preference(name, default, encrypt)
