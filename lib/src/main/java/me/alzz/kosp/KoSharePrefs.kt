@@ -2,6 +2,9 @@ package me.alzz.kosp
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.orhanobut.hawk.Hawk
+import com.orhanobut.hawk.SharedPreferencesStorage
+import me.alzz.kosp.hawk.KeyStoreEncryption
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
@@ -9,19 +12,30 @@ import kotlin.reflect.KProperty
  * 继承此类快速构建 SharePreferences
  * Created by jeremyhe on 2017/11/4.
  */
-abstract class KoSharePrefs(context : Context) {
+abstract class KoSharePrefs(context : Context, useEncrypt: Boolean = false) {
 
     private val sp : SharedPreferences by lazy {
         context.getSharedPreferences(PREFS_FILE_NAME, Context.MODE_PRIVATE)
     }
 
+
     protected abstract val PREFS_FILE_NAME: String
 
-    protected fun int(default: Int = 0, name: String = "") = Preference(name, default)
-    protected fun long(default: Long = 0, name: String = "") = Preference(name, default)
-    protected fun float(default: Float = 0f, name: String = "") = Preference(name, default)
-    protected fun string(default: String = "", name: String = "") = Preference(name, default)
-    protected fun boolean(default: Boolean = false, name: String = "") = Preference(name, default)
+    init {
+        if (useEncrypt) {
+            Hawk.init(context)
+                    .setEncryption(KeyStoreEncryption(context, PREFS_FILE_NAME))
+                    .setStorage(SharedPreferencesStorage(sp))
+                    .build()
+        }
+    }
+
+    protected fun int(default: Int = 0, name: String = "", encrypt: Boolean = false) = Preference(name, default, encrypt)
+    protected fun long(default: Long = 0, name: String = "", encrypt: Boolean = false) = Preference(name, default, encrypt)
+    protected fun float(default: Float = 0f, name: String = "", encrypt: Boolean = false) = Preference(name, default, encrypt)
+    protected fun string(default: String = "", name: String = "", encrypt: Boolean = false) = Preference(name, default, encrypt)
+    protected fun boolean(default: Boolean = false, name: String = "", encrypt: Boolean = false) = Preference(name, default, encrypt)
+
     protected fun <T> preference(default: T, name: String = "", separator: String = "_", postfixMode: Boolean = false): Preference<Preference<T>> {
         val pref = Preference(name, default)
         pref.separator = separator
@@ -29,7 +43,7 @@ abstract class KoSharePrefs(context : Context) {
         return Preference(pref)
     }
 
-    inner class Preference<T>(internal var name : String, private val default : T) :
+    inner class Preference<T>(internal var name : String, private val default : T, private val encrypt: Boolean = false) :
             ReadWriteProperty<Any?, T> {
 
         internal var separator = "_"
@@ -39,6 +53,10 @@ abstract class KoSharePrefs(context : Context) {
 
         override fun getValue(thisRef: Any?, property: KProperty<*>): T {
             val key = if (name.isEmpty()) property.name else name
+            if (encrypt) {
+                return Hawk.get(key)
+            }
+
             with(sp) {
                 val res: Any = when (default) {
                     is Int -> getInt(key, default)
@@ -64,6 +82,11 @@ abstract class KoSharePrefs(context : Context) {
 
         override fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
             val key = if (name.isEmpty()) property.name else name
+            if (encrypt) {
+                Hawk.put(key, value)
+                return
+            }
+
             with(sp.edit()) {
                 when (value) {
                     is Int -> putInt(key, value)

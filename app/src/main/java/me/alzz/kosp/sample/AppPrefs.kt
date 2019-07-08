@@ -6,7 +6,7 @@ import me.alzz.kosp.KoSharePrefs
 /**
  * Created by jeremyhe on 2017/11/4.
  */
-class AppPrefs(context: Context) : KoSharePrefs(context) {
+class AppPrefs(context: Context) : KoSharePrefs(context, true) {
     /**
      * override PREFS_FILE_NAME to define the name of SharePreference
      */
@@ -45,4 +45,9 @@ class AppPrefs(context: Context) : KoSharePrefs(context) {
      * key: 'lastTime@' + userId
      */
     val lastTime by preference(0L, separator = "@", postfixMode = true)
+
+    /**
+     * encrypted data
+     */
+    var encrypt by long(encrypt = true)
 }
