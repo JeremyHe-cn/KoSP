@@ -28,8 +28,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-//    implementation 'me.alzz:hawk:2.1.0'
-    implementation 'me.alzz:hawk:75e27dedfe'
+    implementation 'me.alzz:hawk:2.1.1'
 }
 repositories {
     mavenCentral()

@@ -52,7 +52,7 @@ abstract class KoSharePrefs(context : Context, useEncrypt: Boolean = false) {
         override fun getValue(thisRef: Any?, property: KProperty<*>): T {
             val key = if (name.isEmpty()) property.name else name
             if (encrypt) {
-                return Hawk.get(key)
+                return Hawk.get(KeyStoreHelper.encrypt(PREFS_FILE_NAME, key)) ?: default
             }
 
             with(sp) {
@@ -81,7 +81,7 @@ abstract class KoSharePrefs(context : Context, useEncrypt: Boolean = false) {
         override fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
             val key = if (name.isEmpty()) property.name else name
             if (encrypt) {
-                Hawk.put(key, value)
+                Hawk.put(KeyStoreHelper.encrypt(PREFS_FILE_NAME, key), value)
                 return
             }
 
