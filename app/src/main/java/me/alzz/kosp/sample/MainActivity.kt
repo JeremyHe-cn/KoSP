@@ -27,7 +27,8 @@ class MainActivity : AppCompatActivity() {
 
         prefs.lastTime["user1"] = System.currentTimeMillis()
 
-        prefs.encrypt = System.currentTimeMillis()
+//        prefs.encrypt = System.currentTimeMillis()
+        content += "\r\nencrypt = ${prefs.encrypt}"
 
         contextTv.text = content
     }

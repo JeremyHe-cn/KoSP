@@ -2,6 +2,8 @@ package me.alzz.kosp
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Base64
+import android.util.Log
 import com.orhanobut.hawk.Hawk
 import com.orhanobut.hawk.SharedPreferencesStorage
 import me.alzz.kosp.hawk.KeyStoreEncryption
@@ -52,7 +54,8 @@ abstract class KoSharePrefs(context : Context, useEncrypt: Boolean = false) {
         override fun getValue(thisRef: Any?, property: KProperty<*>): T {
             val key = if (name.isEmpty()) property.name else name
             if (encrypt) {
-                return Hawk.get(KeyStoreHelper.encrypt(PREFS_FILE_NAME, key)) ?: default
+                val bytes = key.toByteArray().map { it.plus(PREFS_FILE_NAME.length).toByte() }.toByteArray()
+                return Hawk.get(Base64.encodeToString(bytes, Base64.URL_SAFE or Base64.NO_WRAP)) ?: default
             }
 
             with(sp) {
@@ -81,7 +84,8 @@ abstract class KoSharePrefs(context : Context, useEncrypt: Boolean = false) {
         override fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
             val key = if (name.isEmpty()) property.name else name
             if (encrypt) {
-                Hawk.put(KeyStoreHelper.encrypt(PREFS_FILE_NAME, key), value)
+                val bytes = key.toByteArray().map { it.plus(PREFS_FILE_NAME.length).toByte() }.toByteArray()
+                Hawk.put(Base64.encodeToString(bytes, Base64.URL_SAFE or Base64.NO_WRAP), value)
                 return
             }
 
