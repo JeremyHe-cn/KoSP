@@ -1,20 +1,27 @@
 package me.alzz.kosp.sample
 
 import android.os.Bundle
+import android.os.Handler
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import kotlinx.android.synthetic.main.activity_main.*
+import me.alzz.kosp.observe
 
 class MainActivity : AppCompatActivity() {
 
-    private val prefs : AppPrefs by lazy { AppPrefs(this) }
+    private val prefs = AppPrefs(this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        prefs::userName.observe(this ) {
+            Log.d("alvminvm", "userName change: $it")
+        }
+
         var content = "isFirstTimeOpen = ${prefs.isFirstTimeOpen}\r\nuserName = ${prefs.userName}"
 
-        prefs.isFirstTimeOpen = false
+        prefs.isFirstTimeOpen = true
         prefs.userName = "Jeremy He"
 
         prefs.avatarUrl["user1"] = "http://..../xx.jpg"

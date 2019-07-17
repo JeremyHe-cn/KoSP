@@ -17,7 +17,7 @@ class AppPrefs(context: Context) : KoSharePrefs(context, true) {
      * key : isFirstTimeOpen
      * value -> Boolean
      */
-    var isFirstTimeOpen by boolean()
+    var isFirstTimeOpen by boolean(true)
 
     /**
      * custom key name
@@ -25,6 +25,8 @@ class AppPrefs(context: Context) : KoSharePrefs(context, true) {
      * value -> String
      */
     var userName by string(name = "user_name")
+
+    var test by Preference(0)
 
     /**
      * dynamic key name

@@ -1,5 +1,8 @@
 package me.alzz.kosp
 
+import android.arch.lifecycle.LifecycleOwner
+import android.arch.lifecycle.MutableLiveData
+import android.arch.lifecycle.Observer
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Base64
@@ -7,6 +10,8 @@ import android.util.Log
 import com.orhanobut.hawk.Hawk
 import com.orhanobut.hawk.SharedPreferencesStorage
 import me.alzz.kosp.hawk.KeyStoreEncryption
+import kotlin.jvm.internal.CallableReference
+import kotlin.jvm.internal.MutablePropertyReference0
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
@@ -15,6 +20,10 @@ import kotlin.reflect.KProperty
  * Created by jeremyhe on 2017/11/4.
  */
 abstract class KoSharePrefs(context : Context, useEncrypt: Boolean = false) {
+
+    companion object {
+        internal val preferenceMap = mutableMapOf<String, Preference<*>>()
+    }
 
     private val sp : SharedPreferences by lazy {
         val sp = context.getSharedPreferences(PREFS_FILE_NAME, Context.MODE_PRIVATE)
@@ -27,8 +36,7 @@ abstract class KoSharePrefs(context : Context, useEncrypt: Boolean = false) {
         sp
     }
 
-
-    protected abstract val PREFS_FILE_NAME: String
+    abstract val PREFS_FILE_NAME: String
 
     protected fun int(default: Int = 0, name: String = "", encrypt: Boolean = false) = Preference(name, default, encrypt)
     protected fun long(default: Long = 0, name: String = "", encrypt: Boolean = false) = Preference(name, default, encrypt)
@@ -49,15 +57,41 @@ abstract class KoSharePrefs(context : Context, useEncrypt: Boolean = false) {
         internal var separator = "_"
         internal var postfixMode = false
 
+        private val prefKey: String
+            get() = if (name.isEmpty()) property.name else name
+
+        private lateinit var property: KProperty<*>
+
+        internal val notify by lazy {
+            val liveData = MutableLiveData<T>()
+            liveData.postValue(getValue(null, property))
+            liveData
+        }
+
         constructor(default: T) : this("", default)
 
+        operator fun provideDelegate(thisRef: Any?, prop: KProperty<*>): Preference<T> {
+            property = prop
+            if (default is Preference<*>) {
+                default.property = property
+            } else {
+                val key = "$PREFS_FILE_NAME#${prop.name}"
+                preferenceMap[key] = this
+            }
+
+            return this
+        }
+
         override fun getValue(thisRef: Any?, property: KProperty<*>): T {
-            val key = if (name.isEmpty()) property.name else name
             if (encrypt) {
-                val bytes = key.toByteArray().map { it.plus(PREFS_FILE_NAME.length).toByte() }.toByteArray()
+                val bytes = prefKey.toByteArray().map { it.plus(PREFS_FILE_NAME.length).toByte() }.toByteArray()
                 return Hawk.get(Base64.encodeToString(bytes, Base64.URL_SAFE or Base64.NO_WRAP)) ?: default
             }
 
+            return getFromPref(prefKey)
+        }
+
+        private fun getFromPref(key: String): T {
             with(sp) {
                 val res: Any = when (default) {
                     is Int -> getInt(key, default)
@@ -82,13 +116,16 @@ abstract class KoSharePrefs(context : Context, useEncrypt: Boolean = false) {
         }
 
         override fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
-            val key = if (name.isEmpty()) property.name else name
             if (encrypt) {
-                val bytes = key.toByteArray().map { it.plus(PREFS_FILE_NAME.length).toByte() }.toByteArray()
+                val bytes = prefKey.toByteArray().map { it.plus(PREFS_FILE_NAME.length).toByte() }.toByteArray()
                 Hawk.put(Base64.encodeToString(bytes, Base64.URL_SAFE or Base64.NO_WRAP), value)
                 return
             }
 
+            saveToPref(prefKey, value)
+        }
+
+        private fun saveToPref(key: String, value: T) {
             with(sp.edit()) {
                 when (value) {
                     is Int -> putInt(key, value)
@@ -100,9 +137,9 @@ abstract class KoSharePrefs(context : Context, useEncrypt: Boolean = false) {
                 }
                 apply()
             }
-        }
 
-        private lateinit var property: KProperty<*>
+            notify.postValue(value)
+        }
 
         operator fun get(key: String): T {
             val name = if (this.name.isEmpty()) property.name else this.name
@@ -112,7 +149,7 @@ abstract class KoSharePrefs(context : Context, useEncrypt: Boolean = false) {
                 "$key$separator$name"
             }
 
-            val pref by Preference(prefName, default)
+            val pref by Preference(prefName, default, encrypt)
             return pref
         }
 
@@ -124,8 +161,18 @@ abstract class KoSharePrefs(context : Context, useEncrypt: Boolean = false) {
                 "$key$separator$name"
             }
 
-            var pref by Preference(prefName, default)
+            var pref by Preference(prefName, default, encrypt)
             pref = value
         }
     }
+}
+
+fun <T> KProperty<T>.observe(owner: LifecycleOwner, block: (T)->Unit) {
+    val prefFileName = ((this as? CallableReference)?.boundReceiver as? KoSharePrefs)?.PREFS_FILE_NAME ?: return
+    val key = "$prefFileName#$name"
+    val data = KoSharePrefs.preferenceMap[key]?.notify as? MutableLiveData<T> ?: return
+    data.observe(owner, Observer {
+        it ?: return@Observer
+        block(it)
+    })
 }
