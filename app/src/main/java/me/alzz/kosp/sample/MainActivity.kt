@@ -1,7 +1,6 @@
 package me.alzz.kosp.sample
 
 import android.os.Bundle
-import android.os.Handler
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import kotlinx.android.synthetic.main.activity_main.*
@@ -9,7 +8,7 @@ import me.alzz.kosp.observe
 
 class MainActivity : AppCompatActivity() {
 
-    private val prefs = AppPrefs(this)
+    private val prefs by lazy { AppPrefs(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

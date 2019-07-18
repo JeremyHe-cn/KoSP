@@ -6,11 +6,7 @@ import me.alzz.kosp.KoSharePrefs
 /**
  * Created by jeremyhe on 2017/11/4.
  */
-class AppPrefs(context: Context) : KoSharePrefs(context, true) {
-    /**
-     * override PREFS_FILE_NAME to define the name of SharePreference
-     */
-    override val PREFS_FILE_NAME = "app.prefs"
+class AppPrefs(context: Context) : KoSharePrefs(context, "app.prefs", true) {
 
     /**
      * default key name
@@ -25,8 +21,6 @@ class AppPrefs(context: Context) : KoSharePrefs(context, true) {
      * value -> String
      */
     var userName by string(name = "user_name")
-
-    var test by Preference(0)
 
     /**
      * dynamic key name
