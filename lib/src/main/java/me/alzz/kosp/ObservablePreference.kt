@@ -19,8 +19,6 @@ class ObservablePreference<T>(
         default: T,
         encrypt: Boolean = false) : Preference<T>(prefFileName, sp, name, default, encrypt) {
 
-    private lateinit var property: KProperty<*>
-
     internal val notify by lazy {
         val liveData = MutableLiveData<T>()
         liveData.postValue(getValue(null, property))

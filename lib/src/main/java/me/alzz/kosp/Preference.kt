@@ -23,11 +23,12 @@ open class Preference<T>(
     private val prefKey: String
         get() = if (name.isEmpty()) property.name else name
 
-    private lateinit var property: KProperty<*>
+    internal lateinit var property: KProperty<*>
 
     constructor(prefFileName: String, sp: SharedPreferences, default: T) : this(prefFileName, sp, "", default)
 
     override fun getValue(thisRef: Any?, property: KProperty<*>): T {
+        this.property = property
         if (encrypt) {
             val bytes = prefKey.toByteArray().map { it.plus(prefFileName.length).toByte() }.toByteArray()
             return Hawk.get(Base64.encodeToString(bytes, Base64.URL_SAFE or Base64.NO_WRAP))
@@ -62,6 +63,7 @@ open class Preference<T>(
     }
 
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
+        this.property = property
         if (encrypt) {
             val bytes = prefKey.toByteArray().map { it.plus(prefFileName.length).toByte() }.toByteArray()
             Hawk.put(Base64.encodeToString(bytes, Base64.URL_SAFE or Base64.NO_WRAP), value)
