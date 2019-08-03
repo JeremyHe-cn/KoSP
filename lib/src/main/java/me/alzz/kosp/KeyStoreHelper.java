@@ -22,6 +22,7 @@ import android.os.Build;
 import android.security.KeyPairGeneratorSpec;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
+import android.support.annotation.Nullable;
 import android.util.Base64;
 import android.util.Log;
 
@@ -144,7 +145,7 @@ public class KeyStoreHelper {
      */
     public static String getSigningKey(String alias) throws CertificateEncodingException {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-            Certificate cert = getPrivateKeyEntry(alias).getCertificate();
+            Certificate cert = getCertificate(alias);
             if (cert == null) {
                 return null;
             }
@@ -156,8 +157,7 @@ public class KeyStoreHelper {
 
     private static KeyStore.PrivateKeyEntry getPrivateKeyEntry(String alias) {
         try {
-            KeyStore ks = KeyStore
-                    .getInstance(SecurityConstants.KEYSTORE_PROVIDER_ANDROID_KEYSTORE);
+            KeyStore ks = KeyStore.getInstance(SecurityConstants.KEYSTORE_PROVIDER_ANDROID_KEYSTORE);
             ks.load(null);
             KeyStore.Entry entry = ks.getEntry(alias, null);
 
@@ -179,9 +179,46 @@ public class KeyStoreHelper {
         }
     }
 
+    @Nullable
+    private static Certificate getCertificate(String alias) {
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                KeyStore ks = KeyStore.getInstance(SecurityConstants.KEYSTORE_PROVIDER_ANDROID_KEYSTORE);
+                ks.load(null);
+                return ks.getCertificate(alias);
+            } else {
+                return getPrivateKeyEntry(alias).getCertificate();
+            }
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage(), e);
+            return null;
+        }
+    }
+
+    @Nullable
+    private static PrivateKey getPrivateKey(String alias) {
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                KeyStore ks = KeyStore.getInstance(SecurityConstants.KEYSTORE_PROVIDER_ANDROID_KEYSTORE);
+                ks.load(null);
+                return (PrivateKey) ks.getKey("alias", null);
+            } else {
+                return getPrivateKeyEntry(alias).getPrivateKey();
+            }
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage(), e);
+            return null;
+        }
+    }
+
+    @Nullable
+    private static PublicKey getPublicKey(String alias) {
+        return getCertificate(alias).getPublicKey();
+    }
+
     public static String encrypt(String alias, String plaintext) {
         try {
-            PublicKey publicKey = getPrivateKeyEntry(alias).getCertificate().getPublicKey();
+            PublicKey publicKey = getPublicKey(alias);
             Cipher cipher = getCipher();
             cipher.init(Cipher.ENCRYPT_MODE, publicKey);
             return Base64.encodeToString(cipher.doFinal(plaintext.getBytes()), Base64.NO_WRAP);
@@ -192,7 +229,7 @@ public class KeyStoreHelper {
 
     public static String decrypt(String alias, String encrypted) {
         try {
-            PrivateKey privateKey = getPrivateKeyEntry(alias).getPrivateKey();
+            PrivateKey privateKey = getPrivateKey(alias);
             Cipher cipher = getCipher();
             cipher.init(Cipher.DECRYPT_MODE, privateKey);
             return new String(cipher.doFinal(Base64.decode(encrypted, Base64.NO_WRAP)));
