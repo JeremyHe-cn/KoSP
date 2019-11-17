@@ -201,7 +201,7 @@ public class KeyStoreHelper {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 KeyStore ks = KeyStore.getInstance(SecurityConstants.KEYSTORE_PROVIDER_ANDROID_KEYSTORE);
                 ks.load(null);
-                return (PrivateKey) ks.getKey("alias", null);
+                return (PrivateKey) ks.getKey(alias, null);
             } else {
                 return getPrivateKeyEntry(alias).getPrivateKey();
             }
