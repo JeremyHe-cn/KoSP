@@ -1,6 +1,7 @@
 package me.alzz.kosp
 
 import android.arch.lifecycle.LifecycleOwner
+import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Observer
 import android.content.SharedPreferences
@@ -47,10 +48,14 @@ class ObservablePreference<T>(
     }
 }
 
-fun <T> KProperty<T>.observe(owner: LifecycleOwner, block: (T)->Unit) {
-    val prefFileName = ((this as? CallableReference)?.boundReceiver as? KoSharePrefs)?.prefName ?: return
+fun <T> KProperty<T>.toLiveData(): MutableLiveData<T>? {
+    val prefFileName = ((this as? CallableReference)?.boundReceiver as? KoSharePrefs)?.prefName ?: return null
     val key = "$prefFileName#$name"
-    val data = preferenceMap[key]?.notify as? MutableLiveData<T> ?: return
+    return preferenceMap[key]?.notify as? MutableLiveData<T> ?: return null
+}
+
+fun <T> KProperty<T>.observe(owner: LifecycleOwner, block: (T)->Unit) {
+    val data = toLiveData() ?: return
     data.observe(owner, Observer {
         it ?: return@Observer
         block(it)
