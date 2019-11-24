@@ -29,7 +29,7 @@ dependencies {
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'me.alzz:hawk:2.1.1'
-    compileOnly 'android.arch.lifecycle:extensions:1.1.1'
+    compileOnly 'androidx.lifecycle:lifecycle-extensions:2.0.0'
 }
 repositories {
     mavenCentral()
