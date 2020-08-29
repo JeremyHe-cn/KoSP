@@ -66,7 +66,8 @@ open class Preference<T>(
         this.property = property
         if (encrypt) {
             val bytes = prefKey.toByteArray().map { it.plus(prefFileName.length).toByte() }.toByteArray()
-            Hawk.put(Base64.encodeToString(bytes, Base64.URL_SAFE or Base64.NO_WRAP), value)
+            val key = Base64.encodeToString(bytes, Base64.URL_SAFE or Base64.NO_WRAP)
+            Hawk.put(key, value)
             return
         }
 
@@ -83,7 +84,7 @@ open class Preference<T>(
                 is String -> putString(key, value)
                 else -> throw UnsupportedOperationException("can't save this type into share preferences")
             }
-            apply()
+            commit()
         }
     }
 
